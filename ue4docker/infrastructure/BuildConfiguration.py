@@ -18,7 +18,8 @@ LINUX_BASE_IMAGES = {
 		'10.0': 'nvidia/cudagl:10.0-devel-ubuntu18.04',
 		'10.1': 'nvidia/cudagl:10.1-devel-ubuntu18.04',
 		'10.2': 'nvidia/cudagl:10.2-devel-ubuntu18.04'
-	}
+	},
+	'vulkan': 'nvidia/vulkan:1.1.121-cuda-10.1-alpha'
 }
 
 # The default CUDA version to use when `--cuda` is specified without a value
@@ -72,6 +73,7 @@ class BuildConfiguration(object):
 		parser.add_argument('--random-memory', action='store_true', help='Use a random memory limit for Windows containers')
 		parser.add_argument('--exclude', action='append', default=[], choices=[ExcludedComponent.Debug, ExcludedComponent.Templates], help='Exclude the specified component (can be specified multiple times to exclude multiple components)')
 		parser.add_argument('--cuda', default=None, metavar='VERSION', help='Add CUDA support as well as OpenGL support when building Linux containers')
+		parser.add_argument('--vulkan', default=None, metavar='VERSION', help='Add Vulkan+CUDA+OpenGL support when building Linux containers')
 		parser.add_argument('-username', default=None, help='Specify the username to use when cloning the git repository')
 		parser.add_argument('-password', default=None, help='Specify the password to use when cloning the git repository')
 		parser.add_argument('-repo', default=None, help='Set the custom git repository to clone when "custom" is specified as the release value')
@@ -231,7 +233,14 @@ class BuildConfiguration(object):
 		
 		# Determine if we are building CUDA-enabled container images
 		self.cuda = None
-		if self.args.cuda is not None:
+		if self.args.vulkan is not None:
+			
+			self.baseImage = LINUX_BASE_IMAGES['vulkan']
+			self.prereqsTag = 'vulkan'
+			self.cuda = '10.1'
+			self.vulkan = '1.1'
+			
+		elif self.args.cuda is not None:
 			
 			# Verify that the specified CUDA version is valid
 			self.cuda = self.args.cuda if self.args.cuda != '' else DEFAULT_CUDA_VERSION

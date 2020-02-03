@@ -133,7 +133,12 @@ def build():
 		elif config.containerPlatform == 'linux':
 			
 			# Determine if we are building CUDA-enabled container images
-			capabilities = 'CUDA {} + OpenGL'.format(config.cuda) if config.cuda is not None else 'OpenGL'
+			capabilities = 'OpenGL'
+			if config.vulkan is not None:
+				capabilities = 'CUDA {} + Vulkan {} + OpenGL'.format(config.cuda, config.vulkan)
+			elif config.cuda is not None:
+				capabilities = 'CUDA {} + OpenGL'.format(config.cuda)
+
 			logger.info('LINUX CONTAINER SETTINGS', False)
 			logger.info('Building GPU-enabled images compatible with NVIDIA Docker ({} support).\n'.format(capabilities), False)
 		
